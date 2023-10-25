@@ -264,109 +264,109 @@ workflow TAXPROFILER {
     ch_versions = ch_versions.mix( PROFILING.out.versions )
     ch_warnings = ch_warnings.mix( PROFILING.out.warning )
 
-    /*
-        SUBWORKFLOW: DIVERSITY with Qiime2
-    */
-    DIVERSITY ( PROFILING.out.qiime_profiles, PROFILING.out.qiime_taxonomy, INPUT_CHECK.out.groups )
-    ch_multiqc_files = ch_multiqc_files.mix( DIVERSITY.out.mqc.collect().ifEmpty([]) )
-    ch_versions = ch_versions.mix( DIVERSITY.out.versions )
-    ch_output_file_paths = ch_output_file_paths.mix(DIVERSITY.out.output_paths)
+//     /*
+//         SUBWORKFLOW: DIVERSITY with Qiime2
+//     */
+//     DIVERSITY ( PROFILING.out.qiime_profiles, PROFILING.out.qiime_taxonomy, INPUT_CHECK.out.groups )
+//     ch_multiqc_files = ch_multiqc_files.mix( DIVERSITY.out.mqc.collect().ifEmpty([]) )
+//     ch_versions = ch_versions.mix( DIVERSITY.out.versions )
+//     ch_output_file_paths = ch_output_file_paths.mix(DIVERSITY.out.output_paths)
 
-    /*
-        SUBWORKFLOW: DIVERSITY with reference database
-    */
-    if ( params.aladdin_ref_dataset ){
-        if ( !params.aladdin_ref_db.containsKey(params.aladdin_ref_dataset) ) {
-            exit 1, "The reference dataset '${params.aladdin_ref_dataset}' is not available in the Aladdin reference database."
-        }
-        if ( !params.aladdin_ref_db[params.aladdin_ref_dataset]['data'].containsKey(params.database) ) {
-            exit 1, "The Aladdin reference dataset '${params.aladdin_ref_dataset}' is not compatible with chosen datbase '${params.database}'."
-        } 
+//     /*
+//         SUBWORKFLOW: DIVERSITY with reference database
+//     */
+//     if ( params.aladdin_ref_dataset ){
+//         if ( !params.aladdin_ref_db.containsKey(params.aladdin_ref_dataset) ) {
+//             exit 1, "The reference dataset '${params.aladdin_ref_dataset}' is not available in the Aladdin reference database."
+//         }
+//         if ( !params.aladdin_ref_db[params.aladdin_ref_dataset]['data'].containsKey(params.database) ) {
+//             exit 1, "The Aladdin reference dataset '${params.aladdin_ref_dataset}' is not compatible with chosen datbase '${params.database}'."
+//         } 
 
-        ref_meta = params.aladdin_ref_db[params.aladdin_ref_dataset]['metadata'] ?: false
-        ref_table = params.aladdin_ref_db[params.aladdin_ref_dataset]['data'][params.database].table ?: false
-        ref_tax = params.aladdin_ref_db[params.aladdin_ref_dataset]['data'][params.database].taxonomy ?: false
-        ch_ref_meta = Channel
-        .fromPath("${ref_meta}", checkIfExists: true)
-        .ifEmpty { exit 1, "Aladdin reference metadata not found: ${ref_meta}" }
-        ch_ref_tax = Channel
-        .fromPath("${ref_tax}", checkIfExists: true)
-        .ifEmpty { exit 1, "Aladdin reference taxonomy not found: ${ref_tax}" }
-        ch_ref_table = Channel
-        .fromPath("${ref_table}", checkIfExists: true)
-        .ifEmpty { exit 1, "Aladdin reference counts table not found: ${ref_table}" }
+//         ref_meta = params.aladdin_ref_db[params.aladdin_ref_dataset]['metadata'] ?: false
+//         ref_table = params.aladdin_ref_db[params.aladdin_ref_dataset]['data'][params.database].table ?: false
+//         ref_tax = params.aladdin_ref_db[params.aladdin_ref_dataset]['data'][params.database].taxonomy ?: false
+//         ch_ref_meta = Channel
+//         .fromPath("${ref_meta}", checkIfExists: true)
+//         .ifEmpty { exit 1, "Aladdin reference metadata not found: ${ref_meta}" }
+//         ch_ref_tax = Channel
+//         .fromPath("${ref_tax}", checkIfExists: true)
+//         .ifEmpty { exit 1, "Aladdin reference taxonomy not found: ${ref_tax}" }
+//         ch_ref_table = Channel
+//         .fromPath("${ref_table}", checkIfExists: true)
+//         .ifEmpty { exit 1, "Aladdin reference counts table not found: ${ref_table}" }
 
-        REFMERGE_DIVERSITY(
-            DIVERSITY.out.tables,
-            DIVERSITY.out.taxonomy,
-            DIVERSITY.out.metadata,
-            ch_ref_table,
-            ch_ref_tax,
-            ch_ref_meta
-        )
-        ch_multiqc_files = ch_multiqc_files.mix(REFMERGE_DIVERSITY.out.mqc.collect().ifEmpty([]))
-        ch_output_file_paths = ch_output_file_paths.mix(REFMERGE_DIVERSITY.out.output_paths)
-    }
-    /*
-        SUBWORKFLOW: VISUALIZATION_KRONA
-    */
-    if ( params.run_krona ) {
-        VISUALIZATION_KRONA ( PROFILING.out.classifications, PROFILING.out.profiles, ch_db )
-        ch_versions = ch_versions.mix( VISUALIZATION_KRONA.out.versions )
-    }
+//         REFMERGE_DIVERSITY(
+//             DIVERSITY.out.tables,
+//             DIVERSITY.out.taxonomy,
+//             DIVERSITY.out.metadata,
+//             ch_ref_table,
+//             ch_ref_tax,
+//             ch_ref_meta
+//         )
+//         ch_multiqc_files = ch_multiqc_files.mix(REFMERGE_DIVERSITY.out.mqc.collect().ifEmpty([]))
+//         ch_output_file_paths = ch_output_file_paths.mix(REFMERGE_DIVERSITY.out.output_paths)
+//     }
+//     /*
+//         SUBWORKFLOW: VISUALIZATION_KRONA
+//     */
+//     if ( params.run_krona ) {
+//         VISUALIZATION_KRONA ( PROFILING.out.classifications, PROFILING.out.profiles, ch_db )
+//         ch_versions = ch_versions.mix( VISUALIZATION_KRONA.out.versions )
+//     }
 
-    /*
-        SUBWORKFLOW: PROFILING STANDARDISATION
-    */
-    if ( params.run_profile_standardisation ) {
-        STANDARDISATION_PROFILES ( PROFILING.out.classifications, PROFILING.out.profiles, ch_db, PROFILING.out.motus_version )
-        ch_multiqc_files = ch_multiqc_files.mix( STANDARDISATION_PROFILES.out.mqc.collect{it[1]}.ifEmpty([]) )
-        ch_versions = ch_versions.mix( STANDARDISATION_PROFILES.out.versions )
-    }
+//     /*
+//         SUBWORKFLOW: PROFILING STANDARDISATION
+//     */
+//     if ( params.run_profile_standardisation ) {
+//         STANDARDISATION_PROFILES ( PROFILING.out.classifications, PROFILING.out.profiles, ch_db, PROFILING.out.motus_version )
+//         ch_multiqc_files = ch_multiqc_files.mix( STANDARDISATION_PROFILES.out.mqc.collect{it[1]}.ifEmpty([]) )
+//         ch_versions = ch_versions.mix( STANDARDISATION_PROFILES.out.versions )
+//     }
 
-    /*
-        MODULE: MultiQC
-    */
+//     /*
+//         MODULE: MultiQC
+//     */
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+//     CUSTOM_DUMPSOFTWAREVERSIONS (
+//         ch_versions.unique().collectFile(name: 'collated_versions.yml')
+//     )
 
-    workflow_summary    = WorkflowTaxprofiler.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
+//     workflow_summary    = WorkflowTaxprofiler.paramsSummaryMultiqc(workflow, summary_params)
+//     ch_workflow_summary = Channel.value(workflow_summary)
 
-    //methods_description    = WorkflowTaxprofiler.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    //ch_methods_description = Channel.value(methods_description)
+//     //methods_description    = WorkflowTaxprofiler.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+//     //ch_methods_description = Channel.value(methods_description)
 
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+//     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+//     //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+//     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
 
-    ch_warnings
-        .collect()
-        .map {
-            it.join('<br>').replace('\n','<br>')
-        }
-        .ifEmpty('')
-        .set { ch_warnings }
+//     ch_warnings
+//         .collect()
+//         .map {
+//             it.join('<br>').replace('\n','<br>')
+//         }
+//         .ifEmpty('')
+//         .set { ch_warnings }
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        mqcPlugins,
-        ch_warnings
-    )
-    multiqc_report = MULTIQC.out.report.toList()
-    report_path = MULTIQC.out.report.map { "${params.outdir}/multiqc/" + it.getName() }
-    ch_output_file_paths = ch_output_file_paths.mix(report_path)
+//     MULTIQC (
+//         ch_multiqc_files.collect(),
+//         ch_multiqc_config.toList(),
+//         ch_multiqc_custom_config.toList(),
+//         ch_multiqc_logo.toList(),
+//         mqcPlugins,
+//         ch_warnings
+//     )
+//     multiqc_report = MULTIQC.out.report.toList()
+//     report_path = MULTIQC.out.report.map { "${params.outdir}/multiqc/" + it.getName() }
+//     ch_output_file_paths = ch_output_file_paths.mix(report_path)
 
-    output_paths = ch_output_file_paths
-                       .collectFile( name: "${params.outdir}/download_data/file_locations.txt", newLine: true )
+//     output_paths = ch_output_file_paths
+//                        .collectFile( name: "${params.outdir}/download_data/file_locations.txt", newLine: true )
     
-    // Parse the list of files for downloading into a JSON file
-    SUMMARIZE_DOWNLOADS( output_paths, ch_design )
+//     // Parse the list of files for downloading into a JSON file
+//     SUMMARIZE_DOWNLOADS( output_paths, ch_design )
 }
 
 /*

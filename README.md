@@ -42,7 +42,7 @@ We recommend you run this pipeline via the [Aladdin Bioinformatics platform](htt
 
 ### Using AWS Batch
 ```bash
-nextflow run Zymo-Research/aladdin-shotgun \
+nextflow run Zymo-Research/io-pipeline-shotgun \
     -profile awsbatch \
     --design "<path to design CSV file>" \
     --database sourmash-zymo \
@@ -74,11 +74,27 @@ There are many other options built in the pipeline to customize your run and han
 
 ### Using Docker
 ```bash
-nextflow run Zymo-Research/aladdin-shotgun \
+nextflow run Zymo-Research/io-pipeline-shotgun \
     -profile docker \
     --design "<path to design CSV file>" \
     --database sourmash-zymo
 ```
+For /dev branch
+```bash
+nextflow run Zymo-Research/io-pipeline-shotgun -r dev \
+    -profile docker \
+    --design "<path to design CSV file>" \
+    --database sourmash-zymo
+```
+
+For local
+```bash
+nextflow run main.nf \
+    -profile docker \
+    --design "<path to design CSV file>" \
+    --database sourmash-zymo
+```
+
 Please see above for requirements of the design CSV file.
 
 ## Credits

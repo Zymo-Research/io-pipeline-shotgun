@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Zymo-Research/aladdin-shotgun
+    Zymo-Research/io-pipeline-shotgun
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/Zymo-Research/aladdin-shotgun
+    Github : https://github.com/Zymo-Research/io-pipeline-shotgun
 
     Website: https://nf-co.re/taxprofiler
     Slack  : https://nfcore.slack.com/channels/taxprofiler

@@ -6,7 +6,7 @@ import re
 import pandas as pd
 
 def parse_args(args=None):
-    Description = "Reformat aladdin-shotgun samplesheet file and check its contents."
+    Description = "Reformat io-pipeline-shotgun samplesheet file and check its contents."
 
     Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
 

@@ -115,6 +115,12 @@ def parse_sourmash(sourmash_results, sketch_log, name, filter_fp, host_lineage):
     profile[name].to_csv(name+"_absabun_parsed_profile.txt", sep="\t")
     # Create a taxonomy file
     profile["Taxon"].to_csv(name+"_profile_taxonomy.txt", sep="\t")
+    
+    # Relative abundance file
+    rel_profile = profile
+    rel_profile[name] = rel_profile[name]/sum(rel_profile[name])
+    # Create a table file for relative abundance
+    rel_profile[name].to_csv(name+"_relabun_parsed_profile.txt", sep="\t")
 
     # Output mqc results
     with open(name+"_sourmash_stats_mqc.json", "w") as fh:

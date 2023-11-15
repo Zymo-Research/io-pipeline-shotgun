@@ -166,7 +166,7 @@ workflow TAXPROFILER {
         ch_shortreads_preprocessed = SHORTREAD_PREPROCESSING ( INPUT_CHECK.out.fastq, adapterlist ).reads
         ch_multiqc_files = ch_multiqc_files.mix( SHORTREAD_PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
         ch_versions = ch_versions.mix( SHORTREAD_PREPROCESSING.out.versions )
-        ch_warnings = ch_warnings.mix( SHORTREAD_PREPROCESSING.out.warning )
+        // ch_warnings = ch_warnings.mix( SHORTREAD_PREPROCESSING.out.warning )
     } else {
         ch_shortreads_preprocessed = INPUT_CHECK.out.fastq
     }
@@ -262,7 +262,7 @@ workflow TAXPROFILER {
     PROFILING ( ch_reads_runmerged, ch_db )
     ch_multiqc_files = ch_multiqc_files.mix( PROFILING.out.mqc.collect().ifEmpty([]) )
     ch_versions = ch_versions.mix( PROFILING.out.versions )
-    ch_warnings = ch_warnings.mix( PROFILING.out.warning )
+    // ch_warnings = ch_warnings.mix( PROFILING.out.warning )
 
     /*
         SUBWORKFLOW: DIVERSITY with Qiime2
@@ -342,13 +342,13 @@ workflow TAXPROFILER {
     //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
 
-    ch_warnings
-        .collect()
-        .map {
-            it.join('<br>').replace('\n','<br>')
-        }
-        .ifEmpty('')
-        .set { ch_warnings }
+    // ch_warnings
+    //     .collect()
+    //     .map {
+    //         it.join('<br>').replace('\n','<br>')
+    //     }
+    //     .ifEmpty('')
+    //     .set { ch_warnings }
 
     MULTIQC (
         ch_multiqc_files.collect(),

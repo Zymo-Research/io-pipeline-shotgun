@@ -14,6 +14,7 @@ process SOURMASH_QIIMEPREP {
     path "*profile_taxonomy.txt", emit: taxonomy
     path "*mqc.json", emit: mqc
     path "versions.yml", emit: versions
+    path "*abun_parsed*", emit: abun_parsed
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"

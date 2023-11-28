@@ -1,6 +1,7 @@
 /work/
 .nextflow*
 
+.conda
 .conda-env
 .coverage
 .env

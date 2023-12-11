@@ -381,24 +381,24 @@ workflow PROFILING {
     }
 
     // Find samples that failed profiling and output a warning
-    ch_qiime_profiles
-        .map { [it[0].id, it[1]] }
-        .set { ch_profiling_pass }
-    reads
-        .map { [it[0].id, it[1]] }
-        .join(ch_profiling_pass, remainder:true)
-        .filter { !it[2] }
-        .map { it[0] }
-        .collect()
-        .map {
-            "The following samples failed taxonomy profiling steps:\n${it.join("; ")}\nA common cause for this is lack of significant match against the database."
-        }
-        .set {ch_warning_message }
-    ch_warning_message
-        .subscribe {
-            log.error "$it"
-            params.ignore_failed_samples ? { log.warn "Ignoring failed samples and continue!" } : System.exit(1)
-        }
+    // ch_qiime_profiles
+    //     .map { [it[0].id, it[1]] }
+    //     .set { ch_profiling_pass }
+    // reads
+    //     .map { [it[0].id, it[1]] }
+    //     .join(ch_profiling_pass, remainder:true)
+    //     .filter { !it[2] }
+    //     .map { it[0] }
+    //     .collect()
+    //     .map {
+    //         "The following samples failed taxonomy profiling steps:\n${it.join("; ")}\nA common cause for this is lack of significant match against the database."
+    //     }
+    //     .set {ch_warning_message }
+    // ch_warning_message
+    //     .subscribe {
+    //         log.error "$it"
+    //         params.ignore_failed_samples ? { log.warn "Ignoring failed samples and continue!" } : System.exit(1)
+    //     }
 
     emit:
     classifications = ch_raw_classifications
@@ -408,5 +408,5 @@ workflow PROFILING {
     versions        = ch_versions
     motus_version   = params.profiler == "motus" ? MOTUS_PROFILE.out.versions.first() : Channel.empty()
     mqc             = ch_multiqc_files
-    warning         = ch_warning_message
+    // warning         = ch_warning_message
 }

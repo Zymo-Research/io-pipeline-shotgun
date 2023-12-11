@@ -1,6 +1,4 @@
----
-<h2 align='center'>Scroll down for the internal use tutorial</h2>
----
+>[Go to the Internal use tutorial](#internal-use)
 
 ## Introduction
 

@@ -1,3 +1,7 @@
+---
+<h2 align='center'>Scroll down for the internal use tutorial</h2>
+---
+
 ## Introduction
 
 This is a bioinformatics analysis pipeline used for shotgun metagenomic data developed at Zymo Research. This pipeline was adpated from community-developed [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline version 1.0.0. Many changes were made to the original pipeline. Some are based on our experience or preferences. But more importatntly, we want to make the pipeline and its results easier to use/understand by people without bioinformatics experience. People can run the pipeline on the point-and-click bioinformatics platform [Aladdin Bioinformatics](https://www.aladdin101.org). Changes include but are not limited to:
@@ -79,13 +83,6 @@ nextflow run Zymo-Research/io-pipeline-shotgun \
     --design "<path to design CSV file>" \
     --database sourmash-zymo
 ```
-For /dev branch
-```bash
-nextflow run Zymo-Research/io-pipeline-shotgun -r dev \
-    -profile docker \
-    --design "<path to design CSV file>" \
-    --database sourmash-zymo
-```
 
 For local
 ```bash
@@ -103,3 +100,23 @@ This pipeline was adapted from nf-core/taxprofiler version 1.0.0. Please refer t
 - Zymo Research microbiomics team (source code, database, review)
 - [Nora Sharp](https://github.com/nsharp2) (Pipeline coding)
 - [Zhenfeng Liu](https://github.com/zxl124) (Pipeline coding)
+
+
+---
+## Internal use:
+>Clone the `internal` branch before using
+
+### Tutorial
+* (**Highly recommended**) For creating new database, please adjust:
+    * `nextflow_schema.json`: database input option
+    * `conf/databases.config`: database name and link - *Add your local database to save the AWS S3 cost!*
+* Please check your docker name in `nextflow.config`, then build docker as that name before running the command line.
+* Command line:
+    ```bash
+    nextflow run main.nf \
+        -profile docker \
+        --database "<database name>" \
+        --design "<path to design CSV file>" \
+        --outdir "<Output directory>"
+    ```
+* Results are stored in your `<outdir>`.

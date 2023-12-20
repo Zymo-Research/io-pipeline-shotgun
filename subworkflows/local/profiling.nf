@@ -11,6 +11,7 @@ include { CENTRIFUGE_CENTRIFUGE                         } from '../../modules/nf
 include { CENTRIFUGE_KREPORT                            } from '../../modules/nf-core/centrifuge/kreport/main'
 include { KHMER_TRIM_LOW_ABUND                          } from '../../modules/local/khmer_trim_low_abund'
 include { SOURMASH_SKETCH                               } from '../../modules/local/sourmash/sketch/main'
+include { SOURMASH_PREFETCH                             } from '../../modules/local/sourmash/fastgather/main'
 include { SOURMASH_GATHER                               } from '../../modules/local/sourmash/gather/main'
 include { METAPHLAN4_METAPHLAN4                         } from '../../modules/nf-core/metaphlan4/metaphlan4/main'
 include { METAPHLAN4_QIIMEPREP                          } from '../../modules/nf-core/metaphlan4/qiimeprep/main'
@@ -286,12 +287,14 @@ workflow PROFILING {
 
         SOURMASH_SKETCH ( ch_input_for_sourmash.reads )
         ch_versions = ch_versions.mix( SOURMASH_SKETCH.out.versions.first() )
-        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db )
+        SOURMASH_PREFETCH( SOURMASH_SKETCH.out.sketch, ch_input_for_sourmash.db )
+        ch_versions = ch_versions.mix( SOURMASH_PREFETCH.out.versions.first() )
+        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db, SOURMASH_PREFETCH.out.picklist )
         ch_versions = ch_versions.mix( SOURMASH_GATHER.out.versions.first() )
-        SOURMASH_GATHER.out.gather
-            .join( SOURMASH_SKETCH.out.sketch )
-            .map { [it[0], it[1], it[3]] }
-            .set { qiime2_input }
+        // SOURMASH_GATHER.out.gather
+        //     .join( SOURMASH_SKETCH.out.sketch )
+        //     .map { [it[0], it[1], it[3]] }
+        //     .set { qiime2_input }
         // SOURMASH_QIIMEPREP ( qiime2_input, host_lineage.collect().ifEmpty([]) )
         // ch_versions = ch_versions.mix( SOURMASH_QIIMEPREP.out.versions.first() )
         // ch_multiqc_files = ch_multiqc_files.mix( SOURMASH_QIIMEPREP.out.mqc.collect().ifEmpty([]) )

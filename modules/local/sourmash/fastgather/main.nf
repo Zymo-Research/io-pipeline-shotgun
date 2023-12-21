@@ -19,7 +19,7 @@ process SOURMASH_PREFETCH {
     def prefix = task.ext.prefix ?: "${meta.id}"    
     """
     DB=`find -L "sourmash_database" -name "*${params.sourmash_kmersize}.txt"`
-    sourmash scripts fastgather $sketch \$DB -k ${params.sourmash_kmersize} -o ${prefix}_fastgather.csv>${prefix}_fastgather.log
+    sourmash scripts fastgather $sketch \$DB -k ${params.sourmash_kmersize} -o ${prefix}_fastgather.csv 2> ${prefix}_fastgather.log
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,0 +1,21 @@
+name: branchwater-dev
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+    - anaconda
+dependencies:
+    - sourmash>=4.8.3,<5
+    - sourmash-minimal=4.8.5=py310h373cc83_0
+    - sourmash_plugin_branchwater=0.8.4=py310h373cc83_1
+    - rust
+    - maturin>=1,<2
+    - pytest
+    - pandas
+    - compilers
+    - pip
+    - plotly=5.14.1
+    - seaborn=0.12.2
+    - matplotlib=3.5.1
+    - scikit-learn=1.2.2
+    - multiqc=1.14

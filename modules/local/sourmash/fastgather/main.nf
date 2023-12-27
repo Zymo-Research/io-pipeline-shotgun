@@ -1,6 +1,6 @@
 process SOURMASH_PREFETCH {
     tag "$meta.id"
-    label 'process_high_memory'
+    // label 'process_high_memory'
 
     if (params.ignore_failed_samples) {
         errorStrategy { task.attempt>1 ? 'ignore' : 'retry' }
@@ -11,14 +11,13 @@ process SOURMASH_PREFETCH {
     path "sourmash_database/*"
 
     output:
-    tuple val(meta), path('*_fastgather.csv'), emit: picklist
+    tuple val(meta), path('*_fastgather.csv'), path('*.log'), emit: picklist
     path "versions.yml", emit: versions 
-    path "*.log"
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"    
     """
-    DB=`find -L "sourmash_database" -name "*${params.sourmash_kmersize}.txt"`
+    DB=`find -L "sourmash_database" -name "*${params.sourmash_kmersize}.zip"`
     sourmash scripts fastgather $sketch \$DB -k ${params.sourmash_kmersize} -o ${prefix}_fastgather.csv 2> ${prefix}_fastgather.log
     
     cat <<-END_VERSIONS > versions.yml

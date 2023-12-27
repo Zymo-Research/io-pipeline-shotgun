@@ -287,19 +287,17 @@ workflow PROFILING {
 
         SOURMASH_SKETCH ( ch_input_for_sourmash.reads )
         ch_versions = ch_versions.mix( SOURMASH_SKETCH.out.versions.first() )
-        SOURMASH_PREFETCH( SOURMASH_SKETCH.out.sketch, ch_input_for_sourmash.db )
-        ch_versions = ch_versions.mix( SOURMASH_PREFETCH.out.versions.first() )
-        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db, SOURMASH_PREFETCH.out.picklist )
+        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db)
         ch_versions = ch_versions.mix( SOURMASH_GATHER.out.versions.first() )
-        // SOURMASH_GATHER.out.gather
-        //     .join( SOURMASH_SKETCH.out.sketch )
-        //     .map { [it[0], it[1], it[3]] }
-        //     .set { qiime2_input }
-        // SOURMASH_QIIMEPREP ( qiime2_input, host_lineage.collect().ifEmpty([]) )
-        // ch_versions = ch_versions.mix( SOURMASH_QIIMEPREP.out.versions.first() )
-        // ch_multiqc_files = ch_multiqc_files.mix( SOURMASH_QIIMEPREP.out.mqc.collect().ifEmpty([]) )
-        // ch_qiime_profiles = ch_qiime_profiles.mix( SOURMASH_QIIMEPREP.out.biom )
-        // ch_taxonomy = ch_taxonomy.mix( SOURMASH_QIIMEPREP.out.taxonomy )
+        SOURMASH_GATHER.out.gather
+            .join( SOURMASH_SKETCH.out.sketch )
+            .map { [it[0], it[1], it[3]] }
+            .set { qiime2_input }
+        SOURMASH_QIIMEPREP ( qiime2_input, host_lineage.collect().ifEmpty([]) )
+        ch_versions = ch_versions.mix( SOURMASH_QIIMEPREP.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( SOURMASH_QIIMEPREP.out.mqc.collect().ifEmpty([]) )
+        ch_qiime_profiles = ch_qiime_profiles.mix( SOURMASH_QIIMEPREP.out.biom )
+        ch_taxonomy = ch_taxonomy.mix( SOURMASH_QIIMEPREP.out.taxonomy )
 
     }    
 

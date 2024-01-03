@@ -27,6 +27,7 @@ workflow PROFILING {
     take:
     reads // [ [ meta ], [ reads ] ]
     databases // [ [ meta ], path ]
+    references
 
     main:
     ch_versions             = Channel.empty()
@@ -44,7 +45,9 @@ workflow PROFILING {
                     [meta, reads]
             }//Not sure if this mapping is needed, will test later
             .combine(databases)
+            .combine(references)
 
+    ch_input_for_sourmash_prefetch = references
     /*
     PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
     */
@@ -273,6 +276,7 @@ workflow PROFILING {
                                     it ->
                                         reads: [ it[0] + it[2], it[1] ]
                                         db: it[3]
+                                        ref: it[4]
                                 }
         host_lineage = params.host_lineage ? Channel.fromPath(params.host_lineage) : Channel.empty()
         // Temporary place holder for host lineage file until reconfiguration of database into a config file
@@ -287,7 +291,7 @@ workflow PROFILING {
 
         SOURMASH_SKETCH ( ch_input_for_sourmash.reads )
         ch_versions = ch_versions.mix( SOURMASH_SKETCH.out.versions.first() )
-        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db)
+        SOURMASH_GATHER ( SOURMASH_SKETCH.out.sketch , ch_input_for_sourmash.db, ch_input_for_sourmash.ref)
         ch_versions = ch_versions.mix( SOURMASH_GATHER.out.versions.first() )
         SOURMASH_GATHER.out.gather
             .join( SOURMASH_SKETCH.out.sketch )

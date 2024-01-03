@@ -37,6 +37,7 @@ if (params.database) {
         params.db_meta = params.databases[params.database].subMap(['tool','db_param']) + ['db_name': params.database]
         params.profiler = params.databases[params.database].tool
         params.db_path = params.databases[params.database].db_path
+        params.db_ref = params.databases[params.database].db_ref
         params.host_lineage = params.databases[params.database].host_lineage ?: false
     }
 } else {
@@ -138,6 +139,7 @@ workflow TAXPROFILER {
 
     // Untar tar.gz database file
     ch_db = Channel.from([[params.db_meta, file(params.db_path, checkIfExists: true)]])
+    ch_ref = Channel.fromPath(params.db_ref, type: 'dir', checkIfExists: true)
     if (params.db_path.endsWith(".tar.gz")) {
         UNTAR (ch_db)
         ch_versions = ch_versions.mix(UNTAR.out.versions.first())
@@ -259,7 +261,7 @@ workflow TAXPROFILER {
     /*
         SUBWORKFLOW: PROFILING
     */
-    PROFILING ( ch_reads_runmerged, ch_db )
+    PROFILING ( ch_reads_runmerged, ch_db , ch_ref )
     ch_multiqc_files = ch_multiqc_files.mix( PROFILING.out.mqc.collect().ifEmpty([]) )
     ch_versions = ch_versions.mix( PROFILING.out.versions )
     // ch_warnings = ch_warnings.mix( PROFILING.out.warning )

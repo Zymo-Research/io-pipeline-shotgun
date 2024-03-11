@@ -42,7 +42,7 @@ def match_legal_pattern(label):
 
 def check_fastq_suffix(filename):
     '''Helper function to check if filenames have the correct suffix'''
-    FQ_EXTENSIONS = (".fq.gz", ".fastq.gz")
+    FQ_EXTENSIONS = (".fq.gz", ".fastq.gz", ".fastq")
     if not filename.endswith(FQ_EXTENSIONS):
         print_error("FASTQ path has invalid extension", "Path", filename)
     return True

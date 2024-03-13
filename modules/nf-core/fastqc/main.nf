@@ -23,9 +23,9 @@ process FASTQC {
     def prefix = task.ext.prefix ?: "${meta.id}"
     if (meta.single_end) {
         """
-        [ -f ${prefix}_R1.fastq ] || ln -s ${reads[0]} ${prefix}_R1.fastq
+        [ -f ${prefix}_R1.fastq.gz ] || ln -s ${reads[0]} ${prefix}_R1.fastq.gz
 
-        fastqc $args --threads $task.cpus ${prefix}_R1.fastq
+        fastqc $args --threads $task.cpus ${prefix}_R1.fastq.gz
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
@@ -34,10 +34,10 @@ process FASTQC {
         """
     } else {
         """
-        [ -f ${prefix}_R1.fastq ] || ln -s ${reads[0]} ${prefix}_R1.fastq
-        [ -f ${prefix}_R2.fastq ] || ln -s ${reads[1]} ${prefix}_R2.fastq
+        [ -f ${prefix}_R1.fastq.gz ] || ln -s ${reads[0]} ${prefix}_R1.fastq.gz
+        [ -f ${prefix}_R2.fastq.gz ] || ln -s ${reads[1]} ${prefix}_R2.fastq.gz
 
-        fastqc $args --threads $task.cpus ${prefix}_R1.fastq ${prefix}_R2.fastq
+        fastqc $args --threads $task.cpus ${prefix}_R1.fastq.gz ${prefix}_R2.fastq.gz
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

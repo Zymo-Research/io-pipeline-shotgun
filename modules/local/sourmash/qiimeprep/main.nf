@@ -2,8 +2,8 @@ process SOURMASH_QIIMEPREP {
     label 'process_low'
     tag "${meta.id}"
 
-    conda "bioconda::biom-format=2.1.14"
-    container 'quay.io/biocontainers/biom-format:2.1.14'
+    conda "bioconda::biom-format=2.1.15"
+    container 'quay.io/biocontainers/biom-format:2.1.15'
 
     input:
     tuple val(meta), path(gather), path(sketch_log)

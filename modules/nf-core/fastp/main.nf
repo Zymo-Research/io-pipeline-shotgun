@@ -1,6 +1,9 @@
 process FASTP {
     tag "$meta.id"
-    label 'process_medium'
+    // label 'process_medium'
+
+    cpus 4
+    memory { 3 * reads[0].size() }
 
     conda "bioconda::fastp=0.23.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

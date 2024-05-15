@@ -18,3 +18,8 @@ mlruns
 src/build
 **/__pycache__
 **/*.egg-info
+
+# local test folder
+/test*
+/design
+run.sh

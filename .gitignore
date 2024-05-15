@@ -168,3 +168,7 @@ cython_debug/
 **/tmp/
 **/*.bak
 ~**
+
+/test*
+/design
+run.sh

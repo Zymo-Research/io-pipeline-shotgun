@@ -1,12 +1,18 @@
 process SOURMASH_GATHER {
     tag "$meta.id"
-    label 'process_high_memory'
     container 'quay.io/biocontainers/sourmash:4.8.2--hdfd78af_0'
+            
+    if (params.database == 'sourmash-zymo') {
+        label = 'process_high_memory'
+    } else {
+        label = 'process_medium'
+    }
     
     if (params.ignore_failed_samples) {
-        errorStrategy = { task.exitStatus in [255] ? 'ignore' : 'retry' }
+        errorStrategy = { task.exitStatus in [1,255] ? 'ignore' : 'retry' }
         errorStrategy { task.attempt>1 ? 'ignore' : 'retry' }
     }
+
 
     input:
     tuple val(meta), path(sketch), path(sketch_log)

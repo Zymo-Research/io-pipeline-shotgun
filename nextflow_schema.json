@@ -25,7 +25,7 @@
                 "database": {
                     "type": "string",
                     "description": "Select the reference database and the tool you would like to use for taxonomic profiling. Your choice will dictate the ranking and nomenclature of the taxonomy profile. We provide several popular reference databases to choose from, but recommend the sourmash-compatible database from Zymo Research.",
-                    "enum": ["sourmash-zymo", "metaphlan4-db", "sourmash-gtdb-reps-rs214"],
+                    "enum": ["sourmash-zymo", "metaphlan4-db", "sourmash-gtdb-reps-rs214", "sourmash_k21_reps-rs214_gtdb", "sourmash_k31_reps-rs214_gtdb", "sourmash_k51_reps-rs214_gtdb"],
                     "default": "sourmash-zymo"
                 },
                 "outdir": {

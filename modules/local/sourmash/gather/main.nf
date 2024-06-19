@@ -4,8 +4,10 @@ process SOURMASH_GATHER {
             
     if (params.database == 'sourmash-zymo') {
         label = 'process_high_memory'
+        maxForks = 10
     } else {
         label = 'process_medium'
+        maxForks = 20
     }
     
     if (params.ignore_failed_samples) {

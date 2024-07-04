@@ -452,9 +452,9 @@
                 },
                 "sourmash_kmersize": {
                     "type": "integer",
-                    "default": 51,
+                    "default": 31,
                     "enum": [51,31,21],
-                    "description": "Sourmash breaks reads down into k-mers which are compared against database for taxonomic assignment. A length of 51 is very robust and allows for good taxonomic resolution down to species level while keeping false positives to a minimum, but is very stringent. Smaller k-mer sizes like 31 can be more sensitive at the genus level but may allow for more false positive calls. We recommend 51 for most projects, however if your samples likely contain poorly annotated genomes, smaller k-mers may provide more useful results.",
+                    "description": "Sourmash breaks reads down into k-mers which are compared against database for taxonomic assignment. A length of 31 is very robust and allows for good taxonomic resolution down to species level while keeping false positives to a minimum, but is very stringent. Smaller k-mer sizes like 31 can be more sensitive at the genus level but may allow for more false positive calls. We recommend 51 for most projects, however if your samples likely contain poorly annotated genomes, smaller k-mers may provide more useful results.",
 		            "advanced": true
                 },
                 "sourmash_threshold_bp": {

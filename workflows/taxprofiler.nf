@@ -88,6 +88,7 @@ include { DIVERSITY                     } from '../subworkflows/local/diversity'
 include { REFMERGE_DIVERSITY            } from '../subworkflows/local/refmerge_diversity'
 include { VISUALIZATION_KRONA           } from '../subworkflows/local/visualization_krona'
 include { STANDARDISATION_PROFILES      } from '../subworkflows/local/standardisation_profiles'
+include { AMRPLUSPLUS                   } from '../subworkflows/local/amrplusplus'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +167,7 @@ workflow TAXPROFILER {
         ch_shortreads_preprocessed = SHORTREAD_PREPROCESSING ( INPUT_CHECK.out.fastq, adapterlist ).reads
         ch_multiqc_files = ch_multiqc_files.mix( SHORTREAD_PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
         ch_versions = ch_versions.mix( SHORTREAD_PREPROCESSING.out.versions )
-        // ch_warnings = ch_warnings.mix( SHORTREAD_PREPROCESSING.out.warning )
+        ch_warnings = ch_warnings.mix( SHORTREAD_PREPROCESSING.out.warning )
     } else {
         ch_shortreads_preprocessed = INPUT_CHECK.out.fastq
     }
@@ -257,12 +258,22 @@ workflow TAXPROFILER {
     }
 
     /*
+        SUBWORKFLOW: AMR PLUS PLUS 
+    */ 
+    if ( params.run_amr ) {
+    	AMRPLUSPLUS( ch_reads_runmerged )
+        ch_versions = ch_versions.mix( AMRPLUSPLUS.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( AMRPLUSPLUS.out.multiqc_files.collect().ifEmpty([]) )
+        ch_output_file_paths = ch_output_file_paths.mix(AMRPLUSPLUS.out.output_paths)
+    }
+
+    /*
         SUBWORKFLOW: PROFILING
     */
     PROFILING ( ch_reads_runmerged, ch_db )
     ch_multiqc_files = ch_multiqc_files.mix( PROFILING.out.mqc.collect().ifEmpty([]) )
     ch_versions = ch_versions.mix( PROFILING.out.versions )
-    // ch_warnings = ch_warnings.mix( PROFILING.out.warning )
+    ch_warnings = ch_warnings.mix( PROFILING.out.warning )
 
     /*
         SUBWORKFLOW: DIVERSITY with Qiime2
@@ -271,6 +282,7 @@ workflow TAXPROFILER {
     ch_multiqc_files = ch_multiqc_files.mix( DIVERSITY.out.mqc.collect().ifEmpty([]) )
     ch_versions = ch_versions.mix( DIVERSITY.out.versions )
     ch_output_file_paths = ch_output_file_paths.mix(DIVERSITY.out.output_paths)
+    ch_warnings = ch_warnings.mix( DIVERSITY.out.warning )
 
     /*
         SUBWORKFLOW: DIVERSITY with reference database
@@ -342,13 +354,13 @@ workflow TAXPROFILER {
     //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
 
-    // ch_warnings
-    //     .collect()
-    //     .map {
-    //         it.join('<br>').replace('\n','<br>')
-    //     }
-    //     .ifEmpty('')
-    //     .set { ch_warnings }
+    ch_warnings
+        .collect()
+        .map {
+            it.join('<br>').replace('\n','<br>')
+        }
+        .ifEmpty('')
+        .set { ch_warnings }
 
     MULTIQC (
         ch_multiqc_files.collect(),

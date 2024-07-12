@@ -17,14 +17,14 @@ process QIIME_DATAMERGE {
 
     output:
     path('merged_filtered_counts.qza')           , emit: filtered_counts_qza
-    path('merged_taxonomy.qza')                  , emit: taxonomy_qza
-    path('merged_filtered_counts_collapsed.qza') , emit: filtered_counts_collapsed_qza
-    path('merged_filtered_counts_collapsed.tsv') , emit: filtered_counts_collapsed_tsv
+    path('merged_taxonomy.qza')                  , optional: true, emit: taxonomy_qza
+    path('merged_filtered_counts_collapsed.qza') , optional: true, emit: filtered_counts_collapsed_qza
+    path('merged_filtered_counts_collapsed.tsv') , optional: true, emit: filtered_counts_collapsed_tsv
     path('versions.yml')                         , emit: versions
     path('*.qza')
-    path('merged_filtered_counts.tsv')
+    path('merged_filtered_counts.tsv')           , optional: true
     path('mod_abund_table.csv')
-
+    
     script:
     """
     qiime feature-table merge \
@@ -45,28 +45,35 @@ process QIIME_DATAMERGE {
     qiime tools export \
         --input-path merged_filtered_counts.qza \
         --output-path merged_filtered_counts_out
-    biom convert -i merged_filtered_counts_out/feature-table.biom -o merged_filtered_counts.tsv --to-tsv
 
-    qiime_taxmerge.py $taxonomy
-    modify_abund_table.py -i merged_filtered_counts.tsv
+    biom summarize-table -i merged_filtered_counts_out/feature-table.biom > biom_table_summary.txt
+    SAMPLES=\$(grep 'Num samples' biom_table_summary.txt | sed 's/Num samples: //')
+    FEATURES=\$(grep 'Num observations' biom_table_summary.txt | sed 's/Num observations: //')
 
-    qiime tools import \
-        --input-path merged_taxonomy.tsv \
-        --type 'FeatureData[Taxonomy]' \
-        --input-format TSVTaxonomyFormat \
-        --output-path merged_taxonomy.qza
+    if [ "\$SAMPLES" -gt 0 ] && [ "\$FEATURES" -gt 0 ]
+    then
+        biom convert -i merged_filtered_counts_out/feature-table.biom -o merged_filtered_counts.tsv --to-tsv
 
-    qiime taxa collapse \
-        --i-table merged_filtered_counts.qza \
-        --i-taxonomy merged_taxonomy.qza \
-        --p-level ${params.taxonomy_collapse_level} \
-        --o-collapsed-table merged_filtered_counts_collapsed.qza
+        qiime_taxmerge.py $taxonomy
+        modify_abund_table.py -i merged_filtered_counts.tsv
+        qiime tools import \
+            --input-path merged_taxonomy.tsv \
+            --type 'FeatureData[Taxonomy]' \
+            --input-format TSVTaxonomyFormat \
+            --output-path merged_taxonomy.qza
 
-    qiime tools export \
-        --input-path merged_filtered_counts_collapsed.qza \
-        --output-path merged_filtered_counts_collapsed_out
-    biom convert -i merged_filtered_counts_collapsed_out/feature-table.biom -o merged_filtered_counts_collapsed.tsv --to-tsv
-        
+        qiime taxa collapse \
+            --i-table merged_filtered_counts.qza \
+            --i-taxonomy merged_taxonomy.qza \
+            --p-level ${params.taxonomy_collapse_level} \
+            --o-collapsed-table merged_filtered_counts_collapsed.qza
+
+        qiime tools export \
+            --input-path merged_filtered_counts_collapsed.qza \
+            --output-path merged_filtered_counts_collapsed_out
+        biom convert -i merged_filtered_counts_collapsed_out/feature-table.biom -o merged_filtered_counts_collapsed.tsv --to-tsv
+    fi
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         qiime: \$(qiime --version | sed '2,2d' | sed 's/q2cli version //g')

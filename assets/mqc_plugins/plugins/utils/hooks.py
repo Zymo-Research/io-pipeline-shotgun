@@ -20,14 +20,12 @@ def execution_start():
         },
         'composition_barplots': {
             'fn': '*level-*.csv'
+        },
+        'interestgroup_comp': {
+            'fn': '*_groupinterest_comp.csv'
         }
     }
-    fn_clean_exts = [
-        '_methyldackel',
-        '_correlation',
-        '_download',
-    ]
-    config.fn_clean_exts.extend(fn_clean_exts)
+
     config.update_dict(config.sp, search_patterns)
     return
 

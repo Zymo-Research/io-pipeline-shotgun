@@ -3,6 +3,16 @@
     "$id": "https://raw.githubusercontent.com/Zymo-Research/aladdin-shotgun/main/nextflow_schema.json",
     "title": "Aladdin shotgun pipeline parameters",
     "description": "Taxonomic profiling of shotgun metagenomic data",
+    "metadata_columns": {
+        "type": "object",
+        "properties": {
+            "group": {
+                "type": "string",
+                "description": "Group labels for diversity comparison between groups. Leave empty if not applicable. Alphanumerical characters only, must start with letters.",
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+            }
+        }
+    },
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -454,16 +464,22 @@
                     "type": "integer",
                     "default": 31,
                     "enum": [51,31,21],
-                    "description": "Sourmash breaks reads down into k-mers which are compared against database for taxonomic assignment. A length of 31 is very robust and allows for good taxonomic resolution down to species level while keeping false positives to a minimum, but is very stringent. Smaller k-mer sizes like 31 can be more sensitive at the genus level but may allow for more false positive calls. We recommend 51 for most projects, however if your samples likely contain poorly annotated genomes, smaller k-mers may provide more useful results.",
+                    "description": "Sourmash breaks reads down into k-mers which are compared against database for taxonomic assignment. Sourmash recommends k=31 for most cases. k=51 increase specificity at the expense of sensitivity, therefore should be used when most species in your samples have very closely related genomes in the database. k=21 is useful when species in your sample have no good reference genomes and you just want classification on the family level or above.",
 		            "advanced": true
                 },
                 "sourmash_threshold_bp": {
                     "type": "integer",
-                    "description": "Sourmash will only report a match to a genome in the database when the estimated overlap between sample and the reference is at least this many base pairs. Choose a smaller number to increase sensitivity to low abundant species. Default is 50,000bp.",
-                    "default": 50000,
+                    "description": "Sourmash will only report a match to a genome in the database when the estimated overlap between sample and the reference is at least this many base pairs. Choose a smaller number to increase sensitivity to low abundant species or small genomes like virus. Default is 5,000bp.",
+                    "default": 5000,
                     "minimum": 1000,
                     "maximum": 1000000,
 		            "advanced": true
+                },
+                "sourmash_strict_filtering": {
+                    "type": "boolean",
+                    "description": "Apply a strict filtering criteria to sourmash results to increase specificity at the expense of sensitivity. Require matches to genomes to have at least 93.5% identity or 1,000,000bp overlap.",
+                    "deafult": false,
+                    "advanced": true
                 },
                 "sourmash_trim_low_abund": {
                     "type": "boolean",
@@ -498,7 +514,7 @@
                 "lowread_filter": {
                     "type": "integer",
                     "description": "Applies a read count filter for samples before downstream analysis. Samples must have at least this many reads with assigned taxonomy to be included in analyses such as alpha and beta diversity. Default is 50,000.",
-                    "default": 1,
+                    "default": 1000,
                     "minimum": 0,
                     "advanced": true
                 },
@@ -538,6 +554,13 @@
                     "type": "integer",
                     "description": "Specify the maximum number of top taxa from each sample you want to compare in QIIME_HEATMAP",
                     "default": 20,
+                    "hidden": true
+                },
+                "group_of_interest": {
+                    "type": "string",
+                    "description": "Group(s) of taxa that are of specific interest. Abundances of these taxa will be summarized in a separate file and plotted in a separate section in the report to highlight these taxa.",
+                    "default": "NONE",
+                    "enum": ["NONE", "wastewater"],
                     "hidden": true
                 },
                 "skip_alphadiversity": {
@@ -816,6 +839,32 @@
                     "enum": ["Aladdin-healthy_gut"]
                 }
             }
+        },
+        "amr_options": {
+            "title": "AMR analysis options",
+            "type": "object",
+            "description": "Options related to AMR analysis.",
+            "properties": {
+                "run_amr": {
+                    "type": "boolean",
+                    "description": "Whether or not to conduct analysis for antimicrobial resistance genes.",
+                    "default": false
+                },
+                "resistome_threshold": {
+                    "type": "number",
+                    "description": "The minimum proportion of nucleotides that have aligned reads to for any AMR gene to be reported.",
+                    "default": 0.8,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "advanced": true
+                },
+                "amr_index_files": {
+                    "type": "string",
+                    "description": "Path to files related to AMR analysis.",
+                    "default": "s3://aladdin-genomes/shotgun_reference/amrplusplus_ref/",
+                    "hidden": true
+                }
+            }
         }
     },
     "allOf": [
@@ -854,6 +903,9 @@
         },
         {
             "$ref": "#/definitions/reference_dataset_comparison_options"
+        },
+        {
+            "$ref": "#/definitions/amr_options"
         }
     ]
 }

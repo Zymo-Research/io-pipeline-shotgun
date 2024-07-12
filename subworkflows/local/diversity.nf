@@ -9,6 +9,7 @@ include { QIIME_FILTER_SINGLETON_SAMPLE                 } from '../../modules/nf
 include { QIIME_ALPHARAREFACTION                        } from '../../modules/nf-core/qiime/alpha_rarefaction/main'
 include { QIIME_DIVERSITYCORE                           } from '../../modules/nf-core/qiime/diversitycore/main'
 include { QIIME_BARPLOT                                 } from '../../modules/nf-core/qiime/barplot/main'
+include { GROUP_COMPOSITION                             } from '../../modules/local/group_composition'
 include { HEATMAP_INPUT                                 } from '../../modules/local/heatmap_input'
 include { QIIME_ALPHADIVERSITY                          } from '../../modules/nf-core/qiime/alphadiversity/main'
 include { QIIME_BETAGROUPCOMPARE                        } from '../../modules/nf-core/qiime/beta_groupcompare/main'
@@ -21,18 +22,24 @@ workflow DIVERSITY {
     groups // group_metadata.csv
 
     main:
-    ch_versions             = Channel.empty()
-    ch_multiqc_files        = Channel.empty()
-    ch_output_file_paths    = Channel.empty()
+    ch_versions          = Channel.empty()
+    ch_multiqc_files     = Channel.empty()
+    ch_output_file_paths = Channel.empty()
+    ch_excel             = Channel.empty()
+    ch_warning_message   = Channel.empty()
 
     QIIME_IMPORT ( qiime_profiles )
     ch_versions = ch_versions.mix( QIIME_IMPORT.out.versions )
 
-    QIIME_DATAMERGE(  QIIME_IMPORT.out.absabun_qza.collect(), qiime_taxonomy.collect() )
+    QIIME_DATAMERGE( QIIME_IMPORT.out.absabun_qza.collect(), qiime_taxonomy.collect() )
     ch_versions = ch_versions.mix( QIIME_DATAMERGE.out.versions )
     ch_output_file_paths = ch_output_file_paths.mix(
         QIIME_DATAMERGE.out.filtered_counts_collapsed_tsv.map{ "${params.outdir}/qiime_mergeddata/" + it.getName() }
         )
+    QIIME_DATAMERGE.out.filtered_counts_collapsed_qza
+        .ifEmpty('There were no samples or taxa left after filtering! Try lower filtering criteria or examine your data quality.')
+        .filter( String )
+        .set{ ch_warning_message }
  
     QIIME_BARPLOT( QIIME_DATAMERGE.out.filtered_counts_qza, QIIME_DATAMERGE.out.taxonomy_qza, groups )
     ch_versions = ch_versions.mix( QIIME_BARPLOT.out.versions )
@@ -40,6 +47,15 @@ workflow DIVERSITY {
     ch_output_file_paths = ch_output_file_paths.mix(
         QIIME_BARPLOT.out.qzv.map{ "${params.outdir}/qiime_composition_barplot/" + it.getName() }
         )
+    
+    if (params.group_of_interest != 'NONE') {
+    	ch_excel = Channel.fromPath(params.groupinterest[params.group_of_interest].excel_path, checkIfExists: true)
+        GROUP_COMPOSITION( ch_excel, QIIME_BARPLOT.out.barplot_composition.collect() )
+        ch_multiqc_files = ch_multiqc_files.mix( GROUP_COMPOSITION.out.compcsv.collect() )
+        ch_output_file_paths = ch_output_file_paths.mix(
+            GROUP_COMPOSITION.out.search_results.map { "${params.outdir}/groups_of_interest/" + it.getName() }
+            )
+    }
 
     QIIME_METADATAFILTER( groups, QIIME_DATAMERGE.out.filtered_counts_collapsed_tsv )
 
@@ -70,7 +86,7 @@ workflow DIVERSITY {
     QIIME_BETAGROUPCOMPARE ( QIIME_DIVERSITYCORE.out.distance.flatten(), QIIME_METADATAFILTER.out.filtered_metadata.collect() )
     ch_versions = ch_versions.mix( QIIME_BETAGROUPCOMPARE.out.versions )
     ch_output_file_paths = ch_output_file_paths.mix(
-        QIIME_BETAGROUPCOMPARE.out.qzv.flatten().map{ "${params.outdir}/qiime_diversity/beta_group_comparison/" + it.getName() }
+        QIIME_BETAGROUPCOMPARE.out.qzv.flatten().map{ "${params.outdir}/qiime_diversity/beta_diversity/" + it.getName() }
         )
 
     QIIME_PLOT_MULTIQC( 
@@ -83,10 +99,11 @@ workflow DIVERSITY {
     ch_multiqc_files = ch_multiqc_files.mix( QIIME_PLOT_MULTIQC.out.mqc_plot.collect() )
 
     emit:
-    versions        = ch_versions          // channel: [ versions.yml ]
-    mqc             = ch_multiqc_files
-    output_paths    = ch_output_file_paths
-    tables          = QIIME_DATAMERGE.out.filtered_counts_qza
-    taxonomy        = QIIME_DATAMERGE.out.taxonomy_qza
-    metadata        = QIIME_METADATAFILTER.out.ref_comp_metadata
+    versions     = ch_versions          // channel: [ versions.yml ]
+    mqc          = ch_multiqc_files
+    output_paths = ch_output_file_paths
+    tables       = QIIME_DATAMERGE.out.filtered_counts_qza
+    taxonomy     = QIIME_DATAMERGE.out.taxonomy_qza
+    metadata     = QIIME_METADATAFILTER.out.ref_comp_metadata
+    warning      = ch_warning_message
 }

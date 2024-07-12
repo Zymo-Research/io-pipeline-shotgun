@@ -1,14 +1,14 @@
 process FASTP {
     tag "$meta.id"
-
+    
     maxForks 5
     cpus 4
     memory { meta.single_end ? (reads.size() < 4.GB ? 4.GB * task.attempt: 8.GB * task.attempt) : (reads.size() < 4.GB ? 8.GB * task.attempt: 16.GB * task.attempt)}
 
-    conda "bioconda::fastp=0.23.2"
+    conda "bioconda::fastp=0.23.4"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/fastp:0.23.2--h79da9fb_0' :
-        'quay.io/biocontainers/fastp:0.23.2--h79da9fb_0' }"
+        'https://depot.galaxyproject.org/singularity/fastp:0.23.4--hadf994f_3' :
+        'quay.io/biocontainers/fastp:0.23.4--hadf994f_3' }"
 
     input:
     tuple val(meta), path(reads)
@@ -41,8 +41,8 @@ process FASTP {
         [ ! -f  ${prefix}_R1.fastq.gz ] && ln -sf $reads ${prefix}_R1.fastq.gz
 
         fastp \\
-            --stdout \\
             --in1 ${prefix}_R1.fastq.gz \\
+            --out1  ${prefix}_R1.fastp.fastq.gz \\
             --thread $task.cpus \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
@@ -50,8 +50,7 @@ process FASTP {
             $fail_fastq \\
             $min_length \\
             $args \\
-            2> ${prefix}.fastp.log \\
-        | gzip -c > ${prefix}.fastp.fastq.gz
+            2> ${prefix}.fastp.log
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
@@ -63,7 +62,6 @@ process FASTP {
         [ ! -f  ${prefix}_R1.fastq.gz ] && ln -sf $reads ${prefix}_R1.fastq.gz
 
         fastp \\
-            --stdout \\
             --in1 ${prefix}_R1.fastq.gz \\
             --out1  ${prefix}_R1.fastp.fastq.gz \\
             --thread $task.cpus \\
@@ -97,7 +95,6 @@ process FASTP {
             $min_length \\
             $merge_fastq \\
             --thread $task.cpus \\
-            --detect_adapter_for_pe \\
             $args \\
             2> ${prefix}.fastp.log
 

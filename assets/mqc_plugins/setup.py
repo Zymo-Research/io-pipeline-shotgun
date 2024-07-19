@@ -11,7 +11,7 @@ setup(
     description="Custom MultiQC plugins for shotgun pipeline",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['multiqc==1.14'],
+    install_requires=['multiqc==1.23'],
     entry_points={
         'multiqc.templates.v1': [
             'aladdin = plugins.templates.aladdin'

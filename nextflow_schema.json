@@ -67,6 +67,12 @@
             "description": "Common options across both long and short read preprocessing QC steps",
             "default": "",
             "properties": {
+                "phred_encode": {
+                    "type": ["integer", "string"],
+                    "default": 33,
+                    "description": "The Phred encoding system determines the sequencing of the FASTQ files.",
+		            "advanced": true
+                },
                 "preprocessing_qc_tool": {
                     "type": "string",
                     "default": "fastqc",

@@ -91,18 +91,18 @@ def parse_sourmash(sourmash_results, sketch_log, name, filter_fp, host_lineage):
     mqc_gs_data["data"][name]["identified_kmers"] = profile["f_unique_weighted"].sum()*100
 
     # Read host lineage file to get a list of host genome accessions and species names
-    # if host_lineage:
-    #     host_info = pd.read_csv(host_lineage)
-    #     host_info = host_info[["ident","species"]]  
-    #     # Separate host and other matches
-    #     host = profile.loc[profile["accession"].isin(host_info["ident"])]
-    #     profile = profile.loc[~profile["accession"].isin(host_info["ident"])]
-    #     mqc_data["data"][name]["Microbes"] = round(profile["f_unique_weighted"].sum()*readcount, 2)
-    #     # Add the species name to the host profile
-    #     host = host[["accession","f_unique_weighted"]]
-    #     host = pd.merge(host, host_info, left_on="accession", right_on="ident", how="left")
-    #     # Record the no. reads of each host organism
-    #     mqc_data["data"][name].update(host.set_index("species")["f_unique_weighted"].mul(readcount).round(2).to_dict())
+    if host_lineage:
+        host_info = pd.read_csv(host_lineage)
+        host_info = host_info[["ident","species"]]  
+        # Separate host and other matches 
+        host = profile.loc[profile["accession"].isin(host_info["ident"])]
+        profile = profile.loc[~profile["accession"].isin(host_info["ident"])]
+        mqc_data["data"][name]["Microbes"] = round(profile["f_unique_weighted"].sum()*readcount, 2)
+        # Add the species name to the host profile
+        host = host[["accession","f_unique_weighted"]]
+        host = pd.merge(host, host_info, left_on="accession", right_on="ident", how="left")
+        # Record the no. reads of each host organism
+        mqc_data["data"][name].update(host.set_index("species")["f_unique_weighted"].mul(readcount).round(2).to_dict())
 
     if len(profile)>0:
         profile = profile[["accession","lineage","f_unique_weighted"]]

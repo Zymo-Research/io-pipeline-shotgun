@@ -146,19 +146,19 @@ workflow TAXPROFILER {
     }
 
     /*
-        MODULE: Run FastQC
+        MODULE: Run FastQC (temporary skip from Sep 23th)
     */
-    ch_input_for_fastqc = INPUT_CHECK.out.fastq.mix( INPUT_CHECK.out.nanopore )
+    // ch_input_for_fastqc = INPUT_CHECK.out.fastq.mix( INPUT_CHECK.out.nanopore )
 
-    if ( params.preprocessing_qc_tool == 'falco' ) {
-        FALCO ( ch_input_for_fastqc )
-        ch_multiqc_files = ch_multiqc_files.mix(FALCO.out.txt.collect{it[1]}.ifEmpty([]))
-        ch_versions = ch_versions.mix(FALCO.out.versions.first())
-    } else {
-        FASTQC ( ch_input_for_fastqc )
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-        ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-    }
+    // if ( params.preprocessing_qc_tool == 'falco' ) {
+    //     FALCO ( ch_input_for_fastqc )
+    //     ch_multiqc_files = ch_multiqc_files.mix(FALCO.out.txt.collect{it[1]}.ifEmpty([]))
+    //     ch_versions = ch_versions.mix(FALCO.out.versions.first())
+    // } else {
+    //     FASTQC ( ch_input_for_fastqc )
+    //     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    //     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    // }
     /*
         SUBWORKFLOW: PERFORM PREPROCESSING
     */

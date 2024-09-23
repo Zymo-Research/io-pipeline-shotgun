@@ -51,15 +51,15 @@ workflow SHORTREAD_PREPROCESSING {
             params.ignore_failed_samples ? { log.warn "Ignoring failed samples and continue!" } : System.exit(1)
         }
 
-    if (params.preprocessing_qc_tool == 'fastqc') {
-        FASTQC_PROCESSED ( ch_processed_reads )
-        ch_versions = ch_versions.mix( FASTQC_PROCESSED.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( FASTQC_PROCESSED.out.zip )
-    } else if  (params.preprocessing_qc_tool == 'falco') {
-        FALCO_PROCESSED ( ch_processed_reads )
-        ch_versions = ch_versions.mix( FALCO_PROCESSED.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( FALCO_PROCESSED.out.txt )
-    }
+    // if (params.preprocessing_qc_tool == 'fastqc') {
+    //     FASTQC_PROCESSED ( ch_processed_reads )
+    //     ch_versions = ch_versions.mix( FASTQC_PROCESSED.out.versions )
+    //     ch_multiqc_files = ch_multiqc_files.mix( FASTQC_PROCESSED.out.zip )
+    // } else if  (params.preprocessing_qc_tool == 'falco') {
+    //     FALCO_PROCESSED ( ch_processed_reads )
+    //     ch_versions = ch_versions.mix( FALCO_PROCESSED.out.versions )
+    //     ch_multiqc_files = ch_multiqc_files.mix( FALCO_PROCESSED.out.txt )
+    // }
 
     emit:
     reads    = ch_processed_reads   // channel: [ val(meta), [ reads ] ]

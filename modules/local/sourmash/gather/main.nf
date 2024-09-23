@@ -2,12 +2,12 @@ process SOURMASH_GATHER {
     tag "$meta.id"
     container 'quay.io/biocontainers/sourmash:4.8.2--hdfd78af_0'
             
-    if (params.database == 'sourmash-zymo') {
-        label = 'process_high_memory'
-        maxForks = 10
-    } else {
+    if (params.sourmash_db_ver == 'reps-rs214') {
         label = 'process_medium'
         maxForks = 20
+    } else {
+        label = 'process_high_memory'
+        maxForks = 10
     }
     
     if (params.ignore_failed_samples) {
